@@ -2,10 +2,11 @@
 #ifndef _BITVECTOR_H_
 #define _BITVECTOR_H_
 
-namespace bitlib {
-
 #include <cstdlib>
 #include <cstring>
+
+
+namespace bitlib {
 
 
 typedef unsigned char byte;
@@ -45,22 +46,34 @@ byte countLUT[] = { // TODO: Move somewhere.
 };
 
 
-template <typename T, typename I = unsigned int>
+template <int BlockSize>
+struct BitBlockType {
+	typedef typename BitBlockType::INVALID_BIT_SIZE type;
+};
+
+// TODO! Check at compile time that these types indeed have this size.
+template <> struct BitBlockType<64> { typedef unsigned long long type; };
+template <> struct BitBlockType<32> { typedef unsigned int type; };
+template <> struct BitBlockType<16> { typedef unsigned short type; };
+template <> struct BitBlockType<8> { typedef unsigned char type; };
+
+
+
+template <int _BlockSize, typename I = unsigned int>
 class BitVector
 {
 	public:
-		typedef I IndexType;
-
-
 		enum {
-			TSizeBytes = sizeof(T),
-			TSize = TSizeBytes * 8
+			BlockSize = _BlockSize
 		};
+
+		typedef I IndexType;
+		typedef typename BitBlockType<BlockSize>::type BitBlock;
 
 
 	private:
 		I size;
-		T* data;
+		BitBlock* data;
 
 
 		/**
@@ -68,7 +81,7 @@ class BitVector
 		 */
 		inline I getTSize() const {
 			if (this->size == 0) return 1;
-			return 1 + (this->size - 1) / TSize;
+			return 1 + (this->size - 1) / BlockSize;
 		}
 
 
@@ -88,7 +101,7 @@ class BitVector
 		BitVector(I size) :
 			size(size)
 		{
-			this->data = (T*)::calloc(this->getTSize(), TSize);
+			this->data = (BitBlock*)::calloc(this->getTSize(), sizeof(BitBlock));
 			if (this->data == NULL) {
 				throw std::bad_alloc();
 			}
@@ -111,7 +124,7 @@ class BitVector
 		 */
 		BitVector& operator=(const BitVector& other) {
 			if (other.size != this->size) {
-				this->data = (T*)::realloc(this->data, other.getTSizeBytes());
+				this->data = (BitBlock*)::realloc(this->data, other.getTSizeBytes());
 				if (this->data == NULL) {
 					throw std::bad_alloc();
 				}
@@ -145,13 +158,13 @@ class BitVector
 		/**
 		 *
 		 */
-		void set(const I& index, T value) {
+		void set(const I& index, BitBlock value) {
 			value = value != 0;
 			if (value) {
-				data[index / TSize] |= 1 << (index % TSize);
+				data[index / BlockSize] |= 1 << (index % BlockSize);
 			}
 			else {
-				data[index / TSize] &= ~(1 << (index % TSize));
+				data[index / BlockSize] &= ~(1 << (index % BlockSize));
 			}
 		}
 
@@ -159,16 +172,16 @@ class BitVector
 		/**
 		 *
 		 */
-		T get(const I& index) const {
-			return (data[index / TSize] & (1 << (index % TSize))) != 0;
+		BitBlock get(const I& index) const {
+			return (data[index / BlockSize] & (1 << (index % BlockSize))) != 0;
 		}
 
 		I count() const {
 			I count = 0;
-			T* p = this->data;
-			T* p_stop = &p[this->getTSize()];
+			BitBlock* p = this->data;
+			BitBlock* p_stop = &p[this->getTSize()];
 			for (; p < p_stop; ++p) {
-				for (I bitIndex = 0; bitIndex < TSize; bitIndex += 8) {
+				for (I bitIndex = 0; bitIndex < BlockSize; bitIndex += 8) {
 					count += countLUT[(*p >> bitIndex) & 0xFF];
 				}
 			}
@@ -191,9 +204,9 @@ class BitVector
 		BitVector& bitAnd(const BitVector& other) {
 			if (other.size != this->size) { return *this; } // For now we don't do anything.
 
-			T* p = this->data;
-			T* p_other = other.data;
-			T* p_stop = &p[this->getTSize()];
+			BitBlock* p = this->data;
+			BitBlock* p_other = other.data;
+			BitBlock* p_stop = &p[this->getTSize()];
 			for (; p < p_stop; ++p, ++p_other) {
 				*p &= *p_other;
 			}
@@ -207,9 +220,9 @@ class BitVector
 		BitVector& bitOr(const BitVector& other) {
 			if (other.size != this->size) { return *this; } // For now we don't do anything.
 
-			T* p = this->data;
-			T* p_other = other.data;
-			T* p_stop = &p[this->getTSize()];
+			BitBlock* p = this->data;
+			BitBlock* p_other = other.data;
+			BitBlock* p_stop = &p[this->getTSize()];
 			for (; p < p_stop; ++p, ++p_other) {
 				*p |= *p_other;
 			}
@@ -223,9 +236,9 @@ class BitVector
 		BitVector& bitXor(const BitVector& other) {
 			if (other.size != this->size) { return *this; } // For now we don't do anything.
 
-			T* p = this->data;
-			T* p_other = other.data;
-			T* p_stop = &p[this->getTSize()];
+			BitBlock* p = this->data;
+			BitBlock* p_other = other.data;
+			BitBlock* p_stop = &p[this->getTSize()];
 			for (; p < p_stop; ++p, ++p_other) {
 				*p ^= *p_other;
 			}

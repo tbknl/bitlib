@@ -8,7 +8,7 @@
 
 //typedef BitVector<unsigned short> BV;
 //typedef BitVector<unsigned int> BV;
-typedef bitlib::BitVector<unsigned long, unsigned long> BV;
+typedef bitlib::BitVector<64, unsigned long> BV;
 
 
 void fillRandom(BV& bv, int prob) {
@@ -43,7 +43,7 @@ int main(int argc, char* argv[]) {
 	print(bv1, 50);
 	print(bv2, 50);
 
-	std::cout << "TSize: " << BV::TSize << std::endl;
+	std::cout << "BlockSize: " << BV::BlockSize << std::endl;
 
 	for (int r = 0; r < 1000; ++r) {
 		bv1.bitAnd(bv2);
