@@ -1,5 +1,6 @@
 #include <iostream>
 #include <ctime>
+#include <cstdlib>
 
 
 #include <bitvector.h>
@@ -7,7 +8,7 @@
 
 //typedef BitVector<unsigned short> BV;
 //typedef BitVector<unsigned int> BV;
-typedef BitVector<unsigned long, unsigned long> BV;
+typedef bitlib::BitVector<unsigned long, unsigned long> BV;
 
 
 void fillRandom(BV& bv, int prob) {

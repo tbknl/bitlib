@@ -2,6 +2,7 @@
 #ifndef _BITVECTOR_H_
 #define _BITVECTOR_H_
 
+namespace bitlib {
 
 #include <cstdlib>
 #include <cstring>
@@ -50,25 +51,40 @@ class BitVector
 	public:
 		typedef I IndexType;
 
+
 		enum {
 			TSizeBytes = sizeof(T),
 			TSize = TSizeBytes * 8
 		};
 
+
 	private:
 		I size;
 		T* data;
 
+
+		/**
+		 *
+		 */
 		inline I getTSize() const {
 			if (this->size == 0) return 1;
 			return 1 + (this->size - 1) / TSize;
 		}
 
+
+		/**
+		 *
+		 */
 		inline I getTSizeBytes() const {
 			return this->getTSize() * 8;
 		}
 
+
 	public:
+
+		/**
+		 *
+		 */
 		BitVector(I size) :
 			size(size)
 		{
@@ -78,6 +94,10 @@ class BitVector
 			}
 		}
 
+
+		/**
+		 *
+		 */
 		BitVector(const BitVector& other) :
 			data(other.data),
 			size(0)
@@ -85,6 +105,10 @@ class BitVector
 			*this = other;
 		}
 
+
+		/**
+		 *
+		 */
 		BitVector& operator=(const BitVector& other) {
 			if (other.size != this->size) {
 				this->data = (T*)::realloc(this->data, other.getTSizeBytes());
@@ -101,14 +125,26 @@ class BitVector
 			return *this;
 		}
 
+
+		/**
+		 *
+		 */
 		~BitVector() {
 			free(this->data);
 		}
 
+
+		/**
+		 *
+		 */
 		I getSize() const {
 			return this->size;
 		}
 
+
+		/**
+		 *
+		 */
 		void set(const I& index, T value) {
 			value = value != 0;
 			if (value) {
@@ -119,6 +155,10 @@ class BitVector
 			}
 		}
 
+
+		/**
+		 *
+		 */
 		T get(const I& index) const {
 			return (data[index / TSize] & (1 << (index % TSize))) != 0;
 		}
@@ -135,11 +175,19 @@ class BitVector
 			return count;
 		}
 
+
+		/**
+		 *
+		 */
 		BitVector& clear() {
 			memset(this->data, 0, this->getTSizeBytes());
 			return *this;
 		}
 
+
+		/**
+		 *
+		 */
 		BitVector& bitAnd(const BitVector& other) {
 			if (other.size != this->size) { return *this; } // For now we don't do anything.
 
@@ -152,6 +200,10 @@ class BitVector
 			return *this;
 		}
 
+
+		/**
+		 *
+		 */
 		BitVector& bitOr(const BitVector& other) {
 			if (other.size != this->size) { return *this; } // For now we don't do anything.
 
@@ -164,6 +216,10 @@ class BitVector
 			return *this;
 		}
 
+
+		/**
+		 *
+		 */
 		BitVector& bitXor(const BitVector& other) {
 			if (other.size != this->size) { return *this; } // For now we don't do anything.
 
@@ -176,6 +232,9 @@ class BitVector
 			return *this;
 		}
 };
+
+
+} // namespace bitlib
 
 
 #endif // _BITVECTOR_H_
