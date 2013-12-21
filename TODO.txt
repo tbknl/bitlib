@@ -1,0 +1,8 @@
+
+- Capacity
+- Grow/shrink
+- Change T parameter to BlockSize (in bits).
+- Add bitInvert, bitInvertAnd, bitInvertOr, bitInvertXor, bitAndInvertedArg, bitOrInvertedArg, bitXorInvertedArg.
+- OpChain (including count).
+- Add Compute class template parameter.
+
