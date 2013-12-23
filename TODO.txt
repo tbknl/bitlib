@@ -2,6 +2,7 @@
 - Capacity
 - Grow/shrink
 - Add setRange and getRange methods.
+- Add append(BitVector&), and resize methods.
 - Add bitInvert (don't forget masking of unused bits!), bitInvertAnd, bitInvertOr, bitInvertXor, bitAndInvertedArg, bitOrInvertedArg, bitXorInvertedArg.
 - OpChain (including count).
 - Add Compute class template parameter.

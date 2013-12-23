@@ -2,6 +2,7 @@
 #ifndef _BITVECTOR_H_
 #define _BITVECTOR_H_
 
+#include <new>
 #include <cstdlib>
 #include <cstring>
 
@@ -57,8 +58,13 @@ template <> struct BitBlockType<16> { typedef unsigned short type; };
 template <> struct BitBlockType<8> { typedef unsigned char type; };
 
 
+class BitComputeNormal
+{
 
-template <int _BlockSize, typename I = unsigned int>
+};
+
+
+template <int _BlockSize, typename I = unsigned int, typename C = BitComputeNormal>
 class BitVector
 {
 	public:
