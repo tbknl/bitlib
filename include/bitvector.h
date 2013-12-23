@@ -9,8 +9,7 @@
 namespace bitlib {
 
 
-typedef unsigned char byte;
-byte countLUT[] = { // TODO: Move somewhere.
+static const char countLUT[] = { // TODO: Move somewhere.
 	0, 1, 1, 2, 1, 2, 2, 3,
 	1, 2, 2, 3, 2, 3, 3, 4,
 	1, 2, 2, 3, 2, 3, 3, 4,
@@ -63,12 +62,12 @@ template <int _BlockSize, typename I = unsigned int>
 class BitVector
 {
 	public:
-		enum {
-			BlockSize = _BlockSize
-		};
-
 		typedef I IndexType;
-		typedef typename BitBlockType<BlockSize>::type BitBlock;
+		typedef typename BitBlockType<_BlockSize>::type BitBlock;
+
+		enum {
+			BlockSize = sizeof(BitBlock) * 8
+		};
 
 
 	private:
