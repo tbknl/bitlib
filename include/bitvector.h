@@ -58,9 +58,21 @@ template <> struct BitBlockType<16> { typedef unsigned short type; };
 template <> struct BitBlockType<8> { typedef unsigned char type; };
 
 
-class BitComputeNormal
+struct BitComputeNormal
 {
+	template <typename BV>
+		static typename BV::IndexType count(const typename BV::BitBlock* const start, const typename BV::BitBlock* const end)
+		{
+			typename BV::IndexType count = 0;
+			const typename BV::BitBlock* p = start;
+			for (; p < end; ++p) {
+				for (typename BV::IndexType bitIndex = 0; bitIndex < BV::BlockSize; bitIndex += 8) {
+					count += countLUT[(*p >> bitIndex) & 0xFF];
+				}
+			}
 
+			return count;
+		}
 };
 
 
@@ -186,15 +198,7 @@ class BitVector
 		 *
 		 */
 		I count() const {
-			I count = 0;
-			BitBlock* p = this->data;
-			BitBlock* p_stop = p + this->getBlockCount();
-			for (; p < p_stop; ++p) {
-				for (I bitIndex = 0; bitIndex < BlockSize; bitIndex += 8) {
-					count += countLUT[(*p >> bitIndex) & 0xFF];
-				}
-			}
-			return count;
+			return C::template count<BitVector>(this->data, this->data + this->getBlockCount());
 		}
 
 
