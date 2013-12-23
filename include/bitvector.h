@@ -115,6 +115,22 @@ struct BitComputeNormal
 	 *
 	 */
 	template <typename BV>
+		static void bitAndInverted(
+			typename BV::BitBlock* data,
+			const typename BV::BitBlock* data2,
+			const typename BV::BitBlock* const end
+		)
+		{
+			for (; data < end; ++data, ++data2) {
+				*data &= ~(*data2);
+			}
+		}
+
+
+	/**
+	 *
+	 */
+	template <typename BV>
 		static void bitOr(
 			typename BV::BitBlock* data,
 			const typename BV::BitBlock* data2,
@@ -131,6 +147,22 @@ struct BitComputeNormal
 	 *
 	 */
 	template <typename BV>
+		static void bitOrInverted(
+			typename BV::BitBlock* data,
+			const typename BV::BitBlock* data2,
+			const typename BV::BitBlock* const end
+		)
+		{
+			for (; data < end; ++data, ++data2) {
+				*data |= ~(*data2);
+			}
+		}
+
+
+	/**
+	 *
+	 */
+	template <typename BV>
 		static void bitXor(
 			typename BV::BitBlock* data,
 			const typename BV::BitBlock* data2,
@@ -139,6 +171,22 @@ struct BitComputeNormal
 		{
 			for (; data < end; ++data, ++data2) {
 				*data ^= *data2;
+			}
+		}
+
+
+	/**
+	 *
+	 */
+	template <typename BV>
+		static void bitXorInverted(
+			typename BV::BitBlock* data,
+			const typename BV::BitBlock* data2,
+			const typename BV::BitBlock* const end
+		)
+		{
+			for (; data < end; ++data, ++data2) {
+				*data ^= ~(*data2);
 			}
 		}
 
@@ -177,6 +225,18 @@ class BitVector
 		 */
 		inline I getDataSizeInBytes() const {
 			return this->getBlockCount() * sizeof(BitBlock);
+		}
+
+
+		/**
+		 * Make sure that bit values are '0' for bits that fall outside the vector, but
+		 * within the final allocated block.
+		 */
+		inline void clearOutsideBits()
+		{
+			if (this->size % BlockSize != 0) {
+				*(this->data + this->getBlockCount() - 1) &= (((BitBlock)1) << (this->size % BlockSize)) - 1;
+			}
 		}
 
 
@@ -290,22 +350,17 @@ class BitVector
 
 
 		/**
-		 *
+		 * Invert/toggle the values of all bits in the vector.
 		 */
 		BitVector& bitInvert() {
 			Compute::template bitInvert<BitVector>(this->data, this->data + this->getBlockCount());
-
-			// Always keep bit values to '0' for bits that fall outside the vector:
-			if (this->size % BlockSize != 0) {
-				*(this->data + this->getBlockCount() - 1) &= (((BitBlock)1) << (this->size % BlockSize)) - 1;
-			}
-
+			this->clearOutsideBits();
 			return *this;
 		}
 
 
 		/**
-		 *
+		 * Compute bitwise AND.
 		 */
 		BitVector& bitAnd(const BitVector& other) {
 			if (other.size != this->size) { return *this; } // For now we don't do anything.
@@ -315,7 +370,18 @@ class BitVector
 
 
 		/**
-		 *
+		 * Compute bitwise AND with inverted value of the argument.
+		 */
+		BitVector& bitAndInverted(const BitVector& other) {
+			if (other.size != this->size) { return *this; } // For now we don't do anything.
+			Compute::template bitAndInverted<BitVector>(this->data, other.data, this->data + this->getBlockCount());
+			this->clearOutsideBits();
+			return *this;
+		}
+
+
+		/**
+		 * Compute bitwise OR.
 		 */
 		BitVector& bitOr(const BitVector& other) {
 			if (other.size != this->size) { return *this; } // For now we don't do anything.
@@ -325,11 +391,33 @@ class BitVector
 
 
 		/**
-		 *
+		 * Compute bitwise OR with inverted value of the argument.
+		 */
+		BitVector& bitOrInverted(const BitVector& other) {
+			if (other.size != this->size) { return *this; } // For now we don't do anything.
+			Compute::template bitOrInverted<BitVector>(this->data, other.data, this->data + this->getBlockCount());
+			this->clearOutsideBits();
+			return *this;
+		}
+
+
+		/**
+		 * Compute bitwise XOR.
 		 */
 		BitVector& bitXor(const BitVector& other) {
 			if (other.size != this->size) { return *this; } // For now we don't do anything.
 			Compute::template bitXor<BitVector>(this->data, other.data, this->data + this->getBlockCount());
+			return *this;
+		}
+
+
+		/**
+		 * Compute bitwise XOR with inverted value of the argument.
+		 */
+		BitVector& bitXorInverted(const BitVector& other) {
+			if (other.size != this->size) { return *this; } // For now we don't do anything.
+			Compute::template bitXorInverted<BitVector>(this->data, other.data, this->data + this->getBlockCount());
+			this->clearOutsideBits();
 			return *this;
 		}
 

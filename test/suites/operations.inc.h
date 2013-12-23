@@ -93,8 +93,7 @@ SUITE_X(operations, BLOCKSIZE)
 			bv1.bitInvert();
 			bv2.bitOr(bv1);
 			bv2.bitInvert();
-			bv3.bitXor(bv2);
-			CHECK_EQUAL(0, bv3.count());
+			CHECK_EQUAL(0, bv3.bitXor(bv2).count());
 		}
 	}
 
@@ -127,6 +126,92 @@ SUITE_X(operations, BLOCKSIZE)
 		}
 	}
 
+
+	TEST(AndInverted)
+	{
+		{
+			BV bv1(1), bv2(1);
+			bv1.bitAndInverted(bv2);
+			CHECK_EQUAL(0, bv1.get(0));
+			bv1.set(0, 1);
+			bv1.bitAndInverted(bv2);
+			CHECK_EQUAL(1, bv1.get(0));
+			bv2.set(0, 1);
+			bv1.bitAndInverted(bv2);
+			CHECK_EQUAL(0, bv1.get(0));
+			bv1.bitAndInverted(bv2);
+			CHECK_EQUAL(0, bv1.get(0));
+		}
+
+		{
+			BV bv1(99999), bv2(99999), bv3(0), bv4(0);
+			BitVectorUtil::fillRandom(bv1, 50);
+			BitVectorUtil::fillRandom(bv2, 50);
+			bv3 = bv1;
+			bv4 = bv2;
+			bv1.bitAndInverted(bv2);
+			bv3.bitAnd(bv4.bitInvert());
+			CHECK_EQUAL(0, bv1.bitXor(bv3).count());
+		}
+	}
+
+
+	TEST(OrInverted)
+	{
+		{
+			BV bv1(1), bv2(1);
+			bv1.bitOrInverted(bv2);
+			CHECK_EQUAL(1, bv1.get(0));
+			bv1.bitOrInverted(bv2);
+			CHECK_EQUAL(1, bv1.get(0));
+			bv2.set(0, 1);
+			bv1.bitOrInverted(bv2);
+			CHECK_EQUAL(1, bv1.get(0));
+			bv1.set(0, 0);
+			bv1.bitOrInverted(bv2);
+			CHECK_EQUAL(0, bv1.get(0));
+		}
+
+		{
+			BV bv1(99999), bv2(99999), bv3(0), bv4(0);
+			BitVectorUtil::fillRandom(bv1, 50);
+			BitVectorUtil::fillRandom(bv2, 50);
+			bv3 = bv1;
+			bv4 = bv2;
+			bv1.bitOrInverted(bv2);
+			bv3.bitOr(bv4.bitInvert());
+			CHECK_EQUAL(0, bv1.bitXor(bv3).count());
+		}
+	}
+
+
+	TEST(XorInverted)
+	{
+		{
+			BV bv1(1), bv2(1);
+			bv1.bitXorInverted(bv2);
+			CHECK_EQUAL(1, bv1.get(0));
+			bv1.bitXorInverted(bv2);
+			CHECK_EQUAL(0, bv1.get(0));
+			bv2.set(0, 1);
+			bv1.bitXorInverted(bv2);
+			CHECK_EQUAL(0, bv1.get(0));
+			bv1.bitXorInverted(bv2);
+			bv1.set(0, 1);
+			CHECK_EQUAL(1, bv1.get(0));
+		}
+
+		{
+			BV bv1(99999), bv2(99999), bv3(0), bv4(0);
+			BitVectorUtil::fillRandom(bv1, 50);
+			BitVectorUtil::fillRandom(bv2, 50);
+			bv3 = bv1;
+			bv4 = bv2;
+			bv1.bitXorInverted(bv2);
+			bv3.bitXor(bv4.bitInvert());
+			CHECK_EQUAL(0, bv1.bitXor(bv3).count());
+		}
+	}
 
 }
 
