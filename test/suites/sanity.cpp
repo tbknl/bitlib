@@ -19,10 +19,10 @@ SUITE(sanity)
 
 	TEST(BitBlockSizes)
 	{
-		CHECK_EQUAL(BV8::BlockSize, 8);
-		CHECK_EQUAL(BV16::BlockSize, 16);
-		CHECK_EQUAL(BV32::BlockSize, 32);
-		CHECK_EQUAL(BV64::BlockSize, 64);
+		CHECK_EQUAL(8, BV8::BlockSize);
+		CHECK_EQUAL(16, BV16::BlockSize);
+		CHECK_EQUAL(32, BV32::BlockSize);
+		CHECK_EQUAL(64, BV64::BlockSize);
 	}
 
 

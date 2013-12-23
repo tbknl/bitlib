@@ -8,31 +8,31 @@ SUITE_X(operations, BLOCKSIZE)
 	{
 		{
 			BV bv(1);
-			CHECK_EQUAL(bv.get(0), 0);
+			CHECK_EQUAL(0, bv.get(0));
 			bv.bitInvert();
-			CHECK_EQUAL(bv.get(0), 1);
+			CHECK_EQUAL(1, bv.get(0));
 			bv.bitInvert();
-			CHECK_EQUAL(bv.get(0), 0);
+			CHECK_EQUAL(0, bv.get(0));
 		}
 		
 		{
 			BV bv(3 * BLOCKSIZE + 1); 
 			bv.set(3 * BLOCKSIZE, 1);
 			bv.bitInvert();
-			CHECK_EQUAL(bv.get(3 * BLOCKSIZE), 0);
+			CHECK_EQUAL(0, bv.get(3 * BLOCKSIZE));
 			bv.bitInvert();
-			CHECK_EQUAL(bv.get(3 * BLOCKSIZE), 1);
+			CHECK_EQUAL(1, bv.get(3 * BLOCKSIZE));
 		}
 
 		{
 			BV bv(99999), bv2(0);
 			bv.bitInvert();
-			CHECK_EQUAL(bv.count(), 99999);
+			CHECK_EQUAL(99999, bv.count());
 			BitVectorUtil::fillRandom(bv, 50);
 			bv2 = bv;
 			bv.bitInvert();
 			bv.bitXor(bv2);
-			CHECK_EQUAL(bv.count(), 99999);
+			CHECK_EQUAL(99999, bv.count());
 		}
 	}
 
@@ -42,15 +42,15 @@ SUITE_X(operations, BLOCKSIZE)
 		{
 			BV bv1(1), bv2(1);
 			bv1.bitOr(bv2);
-			CHECK_EQUAL(bv1.get(0), 0);
+			CHECK_EQUAL(0, bv1.get(0));
 			bv2.set(0, 1);
 			bv1.bitOr(bv2);
-			CHECK_EQUAL(bv1.get(0), 1);
+			CHECK_EQUAL(1, bv1.get(0));
 			bv1.bitOr(bv2);
-			CHECK_EQUAL(bv1.get(0), 1);
+			CHECK_EQUAL(1, bv1.get(0));
 			bv2.set(0, 0);
 			bv1.bitOr(bv2);
-			CHECK_EQUAL(bv1.get(0), 1);
+			CHECK_EQUAL(1, bv1.get(0));
 		}
 
 		{
@@ -70,17 +70,17 @@ SUITE_X(operations, BLOCKSIZE)
 		{
 			BV bv1(1), bv2(1);
 			bv1.bitAnd(bv2);
-			CHECK_EQUAL(bv1.get(0), 0);
+			CHECK_EQUAL(0, bv1.get(0));
 			bv1.set(0, 1);
 			bv1.bitAnd(bv2);
-			CHECK_EQUAL(bv1.get(0), 0);
+			CHECK_EQUAL(0, bv1.get(0));
 			bv2.set(0, 1);
 			bv1.bitAnd(bv2);
-			CHECK_EQUAL(bv1.get(0), 0);
+			CHECK_EQUAL(0, bv1.get(0));
 			bv1.set(0, 1);
 			bv2.set(0, 1);
 			bv1.bitAnd(bv2);
-			CHECK_EQUAL(bv1.get(0), 1);
+			CHECK_EQUAL(1, bv1.get(0));
 		}
 
 		{
@@ -94,7 +94,7 @@ SUITE_X(operations, BLOCKSIZE)
 			bv2.bitOr(bv1);
 			bv2.bitInvert();
 			bv3.bitXor(bv2);
-			CHECK_EQUAL(bv3.count(), 0);
+			CHECK_EQUAL(0, bv3.count());
 		}
 	}
 
@@ -104,16 +104,16 @@ SUITE_X(operations, BLOCKSIZE)
 		{
 			BV bv1(1), bv2(1);
 			bv1.bitXor(bv2);
-			CHECK_EQUAL(bv1.get(0), 0);
+			CHECK_EQUAL(0, bv1.get(0));
 			bv2.set(0, 1);
 			bv1.bitXor(bv2);
-			CHECK_EQUAL(bv1.get(0), 1);
+			CHECK_EQUAL(1, bv1.get(0));
 			bv1.bitXor(bv2);
-			CHECK_EQUAL(bv1.get(0), 0);
+			CHECK_EQUAL(0, bv1.get(0));
 			bv1.set(0, 1);
 			bv2.set(0, 0);
 			bv1.bitXor(bv2);
-			CHECK_EQUAL(bv1.get(0), 1);
+			CHECK_EQUAL(1, bv1.get(0));
 		}
 
 		{
