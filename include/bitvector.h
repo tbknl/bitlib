@@ -60,23 +60,93 @@ template <> struct BitBlockType<8> { typedef unsigned char type; };
 
 struct BitComputeNormal
 {
+	/**
+	 *
+	 */
 	template <typename BV>
-		static typename BV::IndexType count(const typename BV::BitBlock* const start, const typename BV::BitBlock* const end)
+		static typename BV::IndexType count(
+			const typename BV::BitBlock* data,
+			const typename BV::BitBlock* const end
+		)
 		{
 			typename BV::IndexType count = 0;
-			const typename BV::BitBlock* p = start;
-			for (; p < end; ++p) {
+			for (; data < end; ++data) {
 				for (typename BV::IndexType bitIndex = 0; bitIndex < BV::BlockSize; bitIndex += 8) {
-					count += countLUT[(*p >> bitIndex) & 0xFF];
+					count += countLUT[(*data >> bitIndex) & 0xFF];
 				}
 			}
 
 			return count;
 		}
+
+
+	/**
+	 *
+	 */
+	template <typename BV>
+		static void bitInvert(
+			typename BV::BitBlock* data,
+			const typename BV::BitBlock* const end
+		)
+		{
+			for (; data < end; ++data) {
+				*data = ~(*data);
+			}
+		}
+
+
+	/**
+	 *
+	 */
+	template <typename BV>
+		static void bitAnd(
+			typename BV::BitBlock* data,
+			const typename BV::BitBlock* data2,
+			const typename BV::BitBlock* const end
+		)
+		{
+			for (; data < end; ++data, ++data2) {
+				*data &= *data2;
+			}
+		}
+
+
+	/**
+	 *
+	 */
+	template <typename BV>
+		static void bitOr(
+			typename BV::BitBlock* data,
+			const typename BV::BitBlock* data2,
+			const typename BV::BitBlock* const end
+		)
+		{
+			for (; data < end; ++data, ++data2) {
+				*data |= *data2;
+			}
+		}
+
+
+	/**
+	 *
+	 */
+	template <typename BV>
+		static void bitXor(
+			typename BV::BitBlock* data,
+			const typename BV::BitBlock* data2,
+			const typename BV::BitBlock* const end
+		)
+		{
+			for (; data < end; ++data, ++data2) {
+				*data ^= *data2;
+			}
+		}
+
+
 };
 
 
-template <int _BlockSize, typename I = unsigned int, typename C = BitComputeNormal>
+template <int _BlockSize, typename I = unsigned int, typename Compute = BitComputeNormal>
 class BitVector
 {
 	public:
@@ -197,14 +267,6 @@ class BitVector
 		/**
 		 *
 		 */
-		I count() const {
-			return C::template count<BitVector>(this->data, this->data + this->getBlockCount());
-		}
-
-
-		/**
-		 *
-		 */
 		BitVector& clear() {
 			memset(this->data, 0, this->getDataSizeInBytes());
 			return *this;
@@ -214,15 +276,22 @@ class BitVector
 		/**
 		 *
 		 */
+		I count() const {
+			return Compute::template count<BitVector>(this->data, this->data + this->getBlockCount());
+		}
+
+
+		/**
+		 *
+		 */
 		BitVector& bitInvert() {
-			BitBlock* p = this->data;
-			BitBlock* p_stop = &p[this->getBlockCount()];
-			for (; p < p_stop; ++p) {
-				*p = ~(*p);
-			}
+			Compute::template bitInvert<BitVector>(this->data, this->data + this->getBlockCount());
+
+			// Always keep bit values to '0' for bits that fall outside the vector:
 			if (this->size % BlockSize != 0) {
-				*(p-1) &= (((BitBlock)1) << (this->size % BlockSize)) - 1; // Set bits to '0' that fall outside the vector.
+				*(this->data + this->getBlockCount() - 1) &= (((BitBlock)1) << (this->size % BlockSize)) - 1;
 			}
+
 			return *this;
 		}
 
@@ -232,13 +301,7 @@ class BitVector
 		 */
 		BitVector& bitAnd(const BitVector& other) {
 			if (other.size != this->size) { return *this; } // For now we don't do anything.
-
-			BitBlock* p = this->data;
-			BitBlock* p_other = other.data;
-			BitBlock* p_stop = &p[this->getBlockCount()];
-			for (; p < p_stop; ++p, ++p_other) {
-				*p &= *p_other;
-			}
+			Compute::template bitAnd<BitVector>(this->data, other.data, this->data + this->getBlockCount());
 			return *this;
 		}
 
@@ -248,13 +311,7 @@ class BitVector
 		 */
 		BitVector& bitOr(const BitVector& other) {
 			if (other.size != this->size) { return *this; } // For now we don't do anything.
-
-			BitBlock* p = this->data;
-			BitBlock* p_other = other.data;
-			BitBlock* p_stop = &p[this->getBlockCount()];
-			for (; p < p_stop; ++p, ++p_other) {
-				*p |= *p_other;
-			}
+			Compute::template bitOr<BitVector>(this->data, other.data, this->data + this->getBlockCount());
 			return *this;
 		}
 
@@ -264,15 +321,10 @@ class BitVector
 		 */
 		BitVector& bitXor(const BitVector& other) {
 			if (other.size != this->size) { return *this; } // For now we don't do anything.
-
-			BitBlock* p = this->data;
-			BitBlock* p_other = other.data;
-			BitBlock* p_stop = &p[this->getBlockCount()];
-			for (; p < p_stop; ++p, ++p_other) {
-				*p ^= *p_other;
-			}
+			Compute::template bitXor<BitVector>(this->data, other.data, this->data + this->getBlockCount());
 			return *this;
 		}
+
 };
 
 
