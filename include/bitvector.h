@@ -79,7 +79,7 @@ class BitVector
 		/**
 		 *
 		 */
-		inline I getTSize() const {
+		inline I getBlockCount() const {
 			if (this->size == 0) return 1;
 			return 1 + (this->size - 1) / BlockSize;
 		}
@@ -88,8 +88,8 @@ class BitVector
 		/**
 		 *
 		 */
-		inline I getTSizeBytes() const {
-			return this->getTSize() * 8;
+		inline I getDataSizeInBytes() const {
+			return this->getBlockCount() * sizeof(BitBlock);
 		}
 
 
@@ -101,7 +101,7 @@ class BitVector
 		BitVector(I size) :
 			size(size)
 		{
-			this->data = (BitBlock*)::calloc(this->getTSize(), sizeof(BitBlock));
+			this->data = (BitBlock*)::calloc(this->getBlockCount(), sizeof(BitBlock));
 			if (this->data == NULL) {
 				throw std::bad_alloc();
 			}
@@ -124,7 +124,7 @@ class BitVector
 		 */
 		BitVector& operator=(const BitVector& other) {
 			if (other.size != this->size) {
-				this->data = (BitBlock*)::realloc(this->data, other.getTSizeBytes());
+				this->data = (BitBlock*)::realloc(this->data, other.getDataSizeInBytes());
 				if (this->data == NULL) {
 					throw std::bad_alloc();
 				}
@@ -132,7 +132,7 @@ class BitVector
 			}
 
 			if (other.size != 0) {
-				memcpy(this->data, other.data, other.getTSizeBytes());
+				memcpy(this->data, other.data, other.getDataSizeInBytes());
 			}
 
 			return *this;
@@ -179,7 +179,7 @@ class BitVector
 		I count() const {
 			I count = 0;
 			BitBlock* p = this->data;
-			BitBlock* p_stop = &p[this->getTSize()];
+			BitBlock* p_stop = p + this->getBlockCount();
 			for (; p < p_stop; ++p) {
 				for (I bitIndex = 0; bitIndex < BlockSize; bitIndex += 8) {
 					count += countLUT[(*p >> bitIndex) & 0xFF];
@@ -193,7 +193,7 @@ class BitVector
 		 *
 		 */
 		BitVector& clear() {
-			memset(this->data, 0, this->getTSizeBytes());
+			memset(this->data, 0, this->getDataSizeInBytes());
 			return *this;
 		}
 
@@ -206,7 +206,7 @@ class BitVector
 
 			BitBlock* p = this->data;
 			BitBlock* p_other = other.data;
-			BitBlock* p_stop = &p[this->getTSize()];
+			BitBlock* p_stop = &p[this->getBlockCount()];
 			for (; p < p_stop; ++p, ++p_other) {
 				*p &= *p_other;
 			}
@@ -222,7 +222,7 @@ class BitVector
 
 			BitBlock* p = this->data;
 			BitBlock* p_other = other.data;
-			BitBlock* p_stop = &p[this->getTSize()];
+			BitBlock* p_stop = &p[this->getBlockCount()];
 			for (; p < p_stop; ++p, ++p_other) {
 				*p |= *p_other;
 			}
@@ -238,7 +238,7 @@ class BitVector
 
 			BitBlock* p = this->data;
 			BitBlock* p_other = other.data;
-			BitBlock* p_stop = &p[this->getTSize()];
+			BitBlock* p_stop = &p[this->getBlockCount()];
 			for (; p < p_stop; ++p, ++p_other) {
 				*p ^= *p_other;
 			}
