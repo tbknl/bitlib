@@ -12,12 +12,19 @@ int main(int argc, char* argv[])
 	bv1.set(size / 2 + 3, 1);
 	bv2.set(size / 3 + 2, 1);
 
-	for (int r = 0; r < repeats; ++r) {
-		bv3 = bv1;
-		bv1.bitOr(bv2);
-		bv1.bitAnd(bv2);
-		bv1.bitXor(bv2);
-		bv1.count();
+	if (argc > 1 && 0 == strcmp(argv[1], "chain")) {
+		for (int r = 0; r < repeats; ++r) {
+			bv3 = bv1;
+			bv1.chain().bitOr(bv2).bitAnd(bv2).bitXor(bv2).compute();
+			bv1.count();
+		}
+	}
+	else {
+		for (int r = 0; r < repeats; ++r) {
+			bv3 = bv1;
+			bv1.bitOr(bv2).bitAnd(bv2).bitXor(bv2);
+			bv1.count();
+		}
 	}
 
 	return 0;

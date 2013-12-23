@@ -3,6 +3,7 @@
 #define _BITVECTOR_H_
 
 #include <new>
+#include <vector>
 #include <cstdlib>
 #include <cstring>
 
@@ -187,6 +188,49 @@ struct BitComputeNormal
 		{
 			for (; data < end; ++data, ++data2) {
 				*data ^= ~(*data2);
+			}
+		}
+
+
+	/**
+	 *
+	 */
+	template <typename BV>
+		static void chainCompute(
+			typename BV::BitBlock* data,
+			const typename BV::BitBlock* const end,
+			const typename BV::OpChain& chain
+		)
+		{
+			for (; data < end; ++data) {
+				typename BV::OpChain::OpList::const_iterator it = chain.operations.begin();
+				for (; it != chain.operations.end(); ++it) {
+					const typename BV::OpChain::Operation& op = *it;
+
+					switch (op.type) {
+						case BV::OpChain::Operation::INVERT:
+							*data = ~(*data);
+							break;
+						case BV::OpChain::Operation::AND:
+							*data &= *(op.data++);
+							break;
+						case BV::OpChain::Operation::OR:
+							*data |= *(op.data++);
+							break;
+						case BV::OpChain::Operation::XOR:
+							*data ^= *(op.data++);
+							break;
+						case BV::OpChain::Operation::AND_INVERTED:
+							*data &= ~(*(op.data++));
+							break;
+						case BV::OpChain::Operation::OR_INVERTED:
+							*data |= ~(*(op.data++));
+							break;
+						case BV::OpChain::Operation::XOR_INVERTED:
+							*data ^= ~(*(op.data++));
+							break;
+					}
+				}
 			}
 		}
 
@@ -417,6 +461,133 @@ class BitVector
 		BitVector& bitXorInverted(const BitVector& other) {
 			if (other.size != this->size) { return *this; } // For now we don't do anything.
 			Compute::template bitXorInverted<BitVector>(this->data, other.data, this->data + this->getBlockCount());
+			this->clearOutsideBits();
+			return *this;
+		}
+
+
+		/**
+		 * Definition of an Operation Chain.
+		 */
+		struct OpChain
+		{
+			struct Operation
+			{
+				enum {
+					INVERT,
+					AND,
+					OR,
+					XOR,
+					AND_INVERTED,
+					OR_INVERTED,
+					XOR_INVERTED
+				};
+
+				int type;
+				const BitVector* arg;
+				mutable const BitBlock* data;
+			};
+
+			typedef std::vector<Operation> OpList;
+
+			BitVector& operand;
+			OpList operations;
+
+			OpChain(BitVector& bv) : operand(bv) {}
+
+			OpChain& bitInvert()
+			{
+				const Operation op = {Operation::INVERT, NULL, NULL};
+				this->operations.push_back(op);
+				return *this;
+			}
+
+			OpChain& bitAnd(const BitVector& arg)
+			{
+				const Operation op = {Operation::AND, &arg, NULL};
+				if (arg.getSize() == operand.getSize()) { // For now, ignore bitvector with unequal lengths.
+					this->operations.push_back(op);
+				}
+				return *this;
+			}
+
+			OpChain& bitOr(const BitVector& arg)
+			{
+				const Operation op = {Operation::OR, &arg, NULL};
+				if (arg.getSize() == operand.getSize()) { // For now, ignore bitvector with unequal lengths.
+					this->operations.push_back(op);
+				}
+				return *this;
+			}
+
+			OpChain& bitXor(const BitVector& arg)
+			{
+				const Operation op = {Operation::XOR, &arg, NULL};
+				if (arg.getSize() == operand.getSize()) { // For now, ignore bitvector with unequal lengths.
+					this->operations.push_back(op);
+				}
+				return *this;
+			}
+
+			OpChain& bitAndInverted(const BitVector& arg)
+			{
+				const Operation op = {Operation::AND_INVERTED, &arg, NULL};
+				if (arg.getSize() == operand.getSize()) { // For now, ignore bitvector with unequal lengths.
+					this->operations.push_back(op);
+				}
+				return *this;
+			}
+
+			OpChain& bitOrInverted(const BitVector& arg)
+			{
+				const Operation op = {Operation::OR_INVERTED, &arg, NULL};
+				if (arg.getSize() == operand.getSize()) { // For now, ignore bitvector with unequal lengths.
+					this->operations.push_back(op);
+				}
+				return *this;
+			}
+
+			OpChain& bitXorInverted(const BitVector& arg)
+			{
+				const Operation op = {Operation::XOR_INVERTED, &arg, NULL};
+				if (arg.getSize() == operand.getSize()) { // For now, ignore bitvector with unequal lengths.
+					this->operations.push_back(op);
+				}
+				return *this;
+			}
+
+			BitVector& compute()
+			{
+				return this->operand.chainCompute(*this);
+			}
+		};
+
+
+		/**
+		 * Start an operation chain.
+		 */
+		OpChain chain()
+		{
+			return OpChain(*this);
+		}
+
+
+		/*
+		 * Compute an operation chain.
+		 * Note: Normally this will not be called by the client code.
+		 */
+		BitVector& chainCompute(const OpChain& chain)
+		{
+			// Set the data pointer of all operation arguments:
+			typename OpChain::OpList::const_iterator it = chain.operations.begin();
+			for (; it != chain.operations.end(); ++it) {
+				const typename OpChain::Operation& op = *it;
+				if (op.arg != NULL) {
+					op.data = op.arg->data;
+				}
+			}
+
+			Compute::template chainCompute<BitVector>(this->data, this->data + this->getBlockCount(), chain);
 			this->clearOutsideBits();
 			return *this;
 		}

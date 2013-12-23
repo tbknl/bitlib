@@ -2,5 +2,6 @@
 .PHONY: bench
 
 bench:
-	g++ bench1.cpp -o bench1 -I../include -Wall -O1
+	g++ bench1.cpp -o bench1 -I../include -Wall -O2
+	time ./bench1
 
