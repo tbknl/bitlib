@@ -2,7 +2,7 @@
 SUITES_DIR = ./suites
 LIB_DIR = ../include
 TEST_SOURCES = ./main.cpp $(wildcard ${SUITES_DIR}/*.cpp)
-TEST_HEADERS = $(wildcard ./*.h)
+TEST_HEADERS =  $(wildcard ${SUITES_DIR}/*.h)
 LIB_SOURCES = $(wildcard ${LIB_DIR}/*.h)
 
 LINK_LIBS = UnitTest++
