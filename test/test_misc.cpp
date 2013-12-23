@@ -35,13 +35,21 @@ void print(const BV& bv, BV::IndexType maxBits) {
 int main(int argc, char* argv[]) {
 	srand(time(NULL));
 
-	const BV::IndexType numBits = 10 * 1000 * 1000;
+	const BV::IndexType numBits = 10 * 1000 * 1000 - 1;
 	BV bv1(numBits), bv2(numBits), bv3(0);
 	fillRandom(bv1, 30);
 	fillRandom(bv2, 50);
 	bv3 = bv1;
+
+	bv3.bitInvert();
+	bv3.bitInvert();
+	bv3.bitInvert();
+	bv3.bitXor(bv1);
 	print(bv1, 50);
+	print(bv3, 50);
 	print(bv2, 50);
+
+	bv3 = bv1;
 
 	std::cout << "BlockSize: " << BV::BlockSize << std::endl;
 

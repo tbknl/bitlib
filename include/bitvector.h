@@ -205,6 +205,22 @@ class BitVector
 		/**
 		 *
 		 */
+		BitVector& bitInvert() {
+			BitBlock* p = this->data;
+			BitBlock* p_stop = &p[this->getBlockCount()];
+			for (; p < p_stop; ++p) {
+				*p = ~(*p);
+			}
+			if (this->size % BlockSize != 0) {
+				*(p-1) &= (((BitBlock)1) << (this->size % BlockSize)) - 1; // Set bits to '0' that fall outside the vector.
+			}
+			return *this;
+		}
+
+
+		/**
+		 *
+		 */
 		BitVector& bitAnd(const BitVector& other) {
 			if (other.size != this->size) { return *this; } // For now we don't do anything.
 
