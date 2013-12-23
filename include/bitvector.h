@@ -257,6 +257,14 @@ class BitVector
 
 
 		/**
+		 * Toggle a single bit by index.
+		 */
+		void toggle(const I& index) const {
+			data[index / BlockSize] ^= ((BitBlock)1) << (index % BlockSize);
+		}
+
+
+		/**
 		 *
 		 */
 		BitBlock get(const I& index) const {
