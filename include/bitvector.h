@@ -161,10 +161,10 @@ class BitVector
 		void set(const I& index, BitBlock value) {
 			value = value != 0;
 			if (value) {
-				data[index / BlockSize] |= 1 << (index % BlockSize);
+				data[index / BlockSize] |= ((BitBlock)1) << (index % BlockSize);
 			}
 			else {
-				data[index / BlockSize] &= ~(1 << (index % BlockSize));
+				data[index / BlockSize] &= ~(((BitBlock)1) << (index % BlockSize));
 			}
 		}
 
@@ -173,9 +173,13 @@ class BitVector
 		 *
 		 */
 		BitBlock get(const I& index) const {
-			return (data[index / BlockSize] & (1 << (index % BlockSize))) != 0;
+			return (data[index / BlockSize] & (((BitBlock)1) << (index % BlockSize))) != 0;
 		}
 
+
+		/**
+		 *
+		 */
 		I count() const {
 			I count = 0;
 			BitBlock* p = this->data;
